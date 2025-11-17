@@ -1,0 +1,23 @@
+{
+	"meta":{
+		"version": "v1",
+		"app_name": "Books Authors Catalog",
+		"log_prefix": "books_authors_catalog"
+	},
+	"database":{
+		"pool":{
+			"name": "Books_Authors_Catalog_db_bool",
+			"size": 10,
+			"reset_session": true,
+			"use_pure": true
+		},
+		"connection":{
+			"config":{
+				"database": "book",
+				"user": "angelinengando",
+				"host": "localhost",
+				"port": 8889
+			}
+		}
+	}
+}
