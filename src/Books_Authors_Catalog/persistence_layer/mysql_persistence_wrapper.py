@@ -5,6 +5,9 @@ from mysql import connector
 from mysql.connector.pooling import (MySQLConnectionPool)
 import inspect
 import json
+from typing import List
+from Books_Authors_Catalog.infrastructure_layer.book import Book
+from enum import Enum
 
 class MySQLPersistenceWrapper(ApplicationBase):
 	"""Implements the MySQLPersistenceWrapper class."""
@@ -32,24 +35,28 @@ class MySQLPersistenceWrapper(ApplicationBase):
 		self._connection_pool = \
 			self._initialize_database_connection_pool(self.DB_CONFIG)
 		
+		#Book Column ENUMS
+		self.BookColumns = \
+			Enum('BooksColumns', [('Book_ID', 0), ('Title', 1), 
+				('Genre', 2), ('Publication_Year', 3), ('ISBN', 4)])
 
 		# SQL String Constants
 
 		self.VIEW_ALL_BOOKS = \
-			f"SELECT * " \
+			f"SELECT Book_ID, Title, Genre, Publication_Year, ISBN " \
 			f"FROM Books_Table"
 		
 		self.VIEW_ALL_AUTHORS = \
-			f"SELECT * " \
+			f"SELECT Author_ID, First_Name, Last_Name, Birth_Year, Country " \
 			f"FROM Authors_Table"
 		
 		self.SEARCH_BOOKS_BY_TITLE = \
-			f"SELECT * " \
+			f"SELECT Book_ID, Title, Genre, Publication_Year, ISBN " \
 			f"FROM Books_Table" \
 			f"WHERE Title LIKE '%'"
 		
 		self.SEARCH_AUTHORS_BY_LASTNAME = \
-			f"SELECT * " \
+			f"SELECT Author_ID, First_Name, Last_Name, Birth_Year, Country " \
 			f"FROM Authors_Table" \
 			f"WHERE Last_Name LIKE '%s'"
 		
@@ -90,7 +97,9 @@ class MySQLPersistenceWrapper(ApplicationBase):
 				with cursor:
 					cursor.execute(self.VIEW_ALL_BOOKS)
 					results = cursor.fetchall()
-				
+				book_list = self._populate_book_objects(results)
+			#for book in book_list:
+
 				return results
 		except Exception as e:
 			self._logger.log_error(f'{inspect.currentframe().f_code.co_name}: {e}')
@@ -244,3 +253,19 @@ class MySQLPersistenceWrapper(ApplicationBase):
 		except Exception as e:
 			self._logger.log_error(f'{inspect.currentframe().f_code.co_name}:Problem creating connection pool: {e}')
 			self._logger.log_error(f'{inspect.currentframe().f_code.co_name}:Check DB conf:\n{json.dumps(self.DATABASE)}')
+
+	def _populate_training_objects(self, results:List)->List[Book]:
+		"""Populates and returns a list of Book objects"""
+		book_list = []
+		try:
+			for row in results:
+				book = Book()
+				book.Book_ID = row[self.BooksColumns['Book_ID'].value]
+				book.Title = row[self.BooksColumns['Title'].value]
+				book.Genre = row[self.BooksColumns['Genre'].value]
+				book.Publication_Year = row[self.BooksColumns['Publication_Year'].value]
+				book.ISBN = row[self.BooksColumns['ISBN'].value]
+				book_list.append(book)
+			return book_list
+		except Exception as e:
+			self._logger.log_error(f'{inspect.currentframe().f_code.co_name}: {e}')

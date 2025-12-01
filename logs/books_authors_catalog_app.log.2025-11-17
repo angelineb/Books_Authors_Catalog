@@ -1,0 +1,40 @@
+DEBUG:MySQLPersistenceWrapper:2025-11-17 17:27:44,463:__init__:It works!
+DEBUG:MySQLPersistenceWrapper:2025-11-17 17:27:44,464:__init__: DB Connection Config Dict: {'database': 'book', 'user': 'root@localhost', 'host': 'localhost', 'port': 8889}
+DEBUG:MySQLPersistenceWrapper:2025-11-17 17:27:44,464:Creating connection pool...
+ERROR:MySQLPersistenceWrapper:2025-11-17 17:27:44,578:_initialize_database_connection_pool: Problem creating connection pool: 1045 (28000): Access denied for user 'root@localhost'@'localhost' (using password: NO)
+ERROR:MySQLPersistenceWrapper:2025-11-17 17:27:44,578:_initialize_database_connection_pool: Check DB cnfg:
+{"pool": {"name": "Books_Authors_Catalog_db_bool", "size": 10, "reset_session": true, "use_pure": true}, "connection": {"config": {"database": "book", "user": "root@localhost", "host": "localhost", "port": 8889}}}
+DEBUG:AppServices:2025-11-17 17:27:44,579:__init__:It works!
+DEBUG:UserInterface:2025-11-17 17:27:44,579:__init__:It works!
+DEBUG:UserInterface:2025-11-17 17:27:44,579:start: User interface started!
+DEBUG:MySQLPersistenceWrapper:2025-11-17 17:31:14,725:__init__:It works!
+DEBUG:MySQLPersistenceWrapper:2025-11-17 17:31:14,725:__init__: DB Connection Config Dict: {'database': 'book', 'user': 'root', 'host': 'localhost', 'port': 8889}
+DEBUG:MySQLPersistenceWrapper:2025-11-17 17:31:14,725:Creating connection pool...
+ERROR:MySQLPersistenceWrapper:2025-11-17 17:31:14,805:_initialize_database_connection_pool: Problem creating connection pool: 1045 (28000): Access denied for user 'root'@'localhost' (using password: NO)
+ERROR:MySQLPersistenceWrapper:2025-11-17 17:31:14,805:_initialize_database_connection_pool: Check DB cnfg:
+{"pool": {"name": "Books_Authors_Catalog_db_bool", "size": 10, "reset_session": true, "use_pure": true}, "connection": {"config": {"database": "book", "user": "root", "host": "localhost", "port": 8889}}}
+DEBUG:AppServices:2025-11-17 17:31:14,805:__init__:It works!
+DEBUG:UserInterface:2025-11-17 17:31:14,806:__init__:It works!
+DEBUG:UserInterface:2025-11-17 17:31:14,806:start: User interface started!
+DEBUG:MySQLPersistenceWrapper:2025-11-17 17:33:38,570:__init__:It works!
+DEBUG:MySQLPersistenceWrapper:2025-11-17 17:33:38,571:__init__: DB Connection Config Dict: {'database': 'book', 'user': 'angelinengando', 'host': 'localhost', 'port': 8889}
+DEBUG:MySQLPersistenceWrapper:2025-11-17 17:33:38,571:Creating connection pool...
+DEBUG:MySQLPersistenceWrapper:2025-11-17 17:33:38,993:_initialize_database_connection_pool: Connection pool successfully created!
+DEBUG:AppServices:2025-11-17 17:33:38,993:__init__:It works!
+DEBUG:UserInterface:2025-11-17 17:33:38,993:__init__:It works!
+DEBUG:UserInterface:2025-11-17 17:33:38,993:start: User interface started!
+DEBUG:MySQLPersistenceWrapper:2025-11-17 17:41:08,153:__init__:It works!
+DEBUG:MySQLPersistenceWrapper:2025-11-17 17:41:08,154:__init__: DB Connection Config Dict: {'database': 'book', 'user': 'angelinengando', 'host': 'localhost', 'port': 8889}
+DEBUG:MySQLPersistenceWrapper:2025-11-17 17:41:08,154:Creating connection pool...
+DEBUG:MySQLPersistenceWrapper:2025-11-17 17:41:08,559:_initialize_database_connection_pool: Connection pool successfully created!
+DEBUG:AppServices:2025-11-17 17:41:08,559:__init__:It works!
+DEBUG:UserInterface:2025-11-17 17:41:08,559:__init__:It works!
+DEBUG:UserInterface:2025-11-17 17:41:08,559:start: User interface started!
+DEBUG:MySQLPersistenceWrapper:2025-11-17 17:51:00,281:__init__:It works!
+DEBUG:MySQLPersistenceWrapper:2025-11-17 17:51:00,281:__init__: DB Connection Config Dict: {'database': 'book', 'user': 'angelinengando', 'host': 'localhost', 'port': 8889}
+DEBUG:MySQLPersistenceWrapper:2025-11-17 17:51:00,281:Creating connection pool...
+DEBUG:MySQLPersistenceWrapper:2025-11-17 17:51:00,715:_initialize_database_connection_pool: Connection pool successfully created!
+DEBUG:AppServices:2025-11-17 17:51:00,715:__init__:It works!
+DEBUG:UserInterface:2025-11-17 17:51:00,715:__init__:It works!
+DEBUG:UserInterface:2025-11-17 17:51:00,715:start: User interface started!
+DEBUG:AppServices:2025-12-01 05:20:04,396:In view_all_books_as_json()...
