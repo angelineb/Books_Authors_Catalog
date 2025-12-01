@@ -4,7 +4,8 @@ import json
 from argparse import ArgumentParser
 from Books_Authors_Catalog.service_layer.app_services \
 	import AppServices
-from Books_Authors_Catalog.presentation_layer.user_interface import UserInterface
+from Books_Authors_Catalog.presentation_layer.console_ui \
+	import ConsoleUI
 
 
 
@@ -18,18 +19,18 @@ def main():
 			config = json.loads(f.read())
 		
 		#db = MySQLPersistenceWrapper(config)
-		service_layer = AppServices(config)
+		#service_layer = AppServices(config)
 
-		books_list = service_layer.view_all_books_as_json()
+		#books_list = service_layer.view_all_books_as_json()
 		#books_list = service_layer.view_all_books()
-		print(books_list)
+		#print(books_list)
 		
 		#for books in books_list:
 			#print(f'{books}')
 
-	#ui = UserInterface(config)
+		ui = ConsoleUI(config)
 	#print("")
-	#ui.start()
+		ui.start()
 			
 		
 
