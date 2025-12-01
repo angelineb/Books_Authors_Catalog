@@ -14,8 +14,14 @@ def main():
 		config = None
 		with open(args.configfile, 'r') as f:
 			config = json.loads(f.read())
+		
+		db = MySQLPersistenceWrapper(config)
+		books_list = db.view_all_books()
+		for books in books_list:
+			print(f'{books}')
 
 	ui = UserInterface(config)
+	print("")
 	ui.start()
 			
 		
@@ -26,7 +32,7 @@ def configure_and_parse_commandline_arguments():
 	parser = ArgumentParser(
 	prog='main.py',
 	description='Start the application with a configuration file.',
-	epilog='POC: Your Name | your@email')
+	epilog='POC: Angeline Blandine Ngando | aen64491@marymount.edu')
 
 	parser.add_argument('-c','--configfile',
 					help="Configuration file to load.",
