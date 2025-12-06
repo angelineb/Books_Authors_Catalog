@@ -7,6 +7,7 @@ import inspect
 import json
 from typing import List
 from Books_Authors_Catalog.infrastructure_layer.book import Book
+from Books_Authors_Catalog.infrastructure_layer.author import Author
 from enum import Enum
 
 class MySQLPersistenceWrapper(ApplicationBase):
@@ -37,8 +38,12 @@ class MySQLPersistenceWrapper(ApplicationBase):
 		
 		#Book Column ENUMS
 		self.BookColumns = \
-			Enum('BooksColumns', [('Book_ID', 0), ('Title', 1), 
+			Enum('BookColumns', [('Book_ID', 0), ('Title', 1), 
 				('Genre', 2), ('Publication_Year', 3), ('ISBN', 4)])
+		#Author Column ENUMS
+		self.AuthorColumns = \
+			Enum('AuthorColumns', [('Author_ID', 0), ('First_Name', 1),
+				('Last_Name', 2), ('Birth_Year', 3), ('Country', 4) ])
 
 		# SQL String Constants
 
@@ -53,7 +58,7 @@ class MySQLPersistenceWrapper(ApplicationBase):
 		self.SEARCH_BOOKS_BY_TITLE = \
 			f"SELECT Book_ID, Title, Genre, Publication_Year, ISBN " \
 			f"FROM Books_Table" \
-			f"WHERE Title LIKE '%'"
+			f"WHERE Title LIKE '%s'"
 		
 		self.SEARCH_AUTHORS_BY_LASTNAME = \
 			f"SELECT Author_ID, First_Name, Last_Name, Birth_Year, Country " \
@@ -100,7 +105,8 @@ class MySQLPersistenceWrapper(ApplicationBase):
 				book_list = self._populate_book_objects(results)
 			#for book in book_list:
 
-				return results
+				#return results
+				return book_list
 		except Exception as e:
 			self._logger.log_error(f'{inspect.currentframe().f_code.co_name}: {e}')
 
@@ -116,8 +122,9 @@ class MySQLPersistenceWrapper(ApplicationBase):
 				with cursor:
 					cursor.execute(self.VIEW_ALL_AUTHORS)
 					results = cursor.fetchall()
-				
-				return results
+				author_list = self._populate_author_objects(results)
+				#return results
+				return author_list
 		except Exception as e:
 			self._logger.log_error(f'{inspect.currentframe().f_code.co_name}: {e}')
 
@@ -130,10 +137,11 @@ class MySQLPersistenceWrapper(ApplicationBase):
 			with connection:
 				cursor = connection.cursor()
 				with cursor:
-					cursor.execute(self.SEARCH_BOOKS_BY_TITLE, ([Title]))
+					cursor.execute(self.SEARCH_BOOKS_BY_TITLE, (['Title']))
 					results = cursor.fetchall()
-				
-				return results
+				searchedbook_list = self._populate_searchbook_objects(results)
+				#return results
+				return searchedbook_list
 		except Exception as e:
 			self._logger.log_error(f'{inspect.currentframe().f_code.co_name}: {e}')
 		
@@ -254,18 +262,52 @@ class MySQLPersistenceWrapper(ApplicationBase):
 			self._logger.log_error(f'{inspect.currentframe().f_code.co_name}:Problem creating connection pool: {e}')
 			self._logger.log_error(f'{inspect.currentframe().f_code.co_name}:Check DB conf:\n{json.dumps(self.DATABASE)}')
 
-	def _populate_training_objects(self, results:List)->List[Book]:
+	def _populate_book_objects(self, results:List)->List[Book]:
 		"""Populates and returns a list of Book objects"""
 		book_list = []
 		try:
 			for row in results:
 				book = Book()
-				book.Book_ID = row[self.BooksColumns['Book_ID'].value]
-				book.Title = row[self.BooksColumns['Title'].value]
-				book.Genre = row[self.BooksColumns['Genre'].value]
-				book.Publication_Year = row[self.BooksColumns['Publication_Year'].value]
-				book.ISBN = row[self.BooksColumns['ISBN'].value]
+				book.Book_ID = row[self.BookColumns['Book_ID'].value]
+				book.Title = row[self.BookColumns['Title'].value]
+				book.Genre = row[self.BookColumns['Genre'].value]
+				book.Publication_Year = row[self.BookColumns['Publication_Year'].value]
+				book.ISBN = row[self.BookColumns['ISBN'].value]
 				book_list.append(book)
 			return book_list
 		except Exception as e:
 			self._logger.log_error(f'{inspect.currentframe().f_code.co_name}: {e}')
+
+	def _populate_author_objects(self, results:List)->List[Author]:
+		"""Populates and returns a list of Author objects"""
+		author_list = []
+		try:
+			for row in results:
+				author = Author()
+				author.Author_ID = row[self.AuthorColumns['Author_ID'].value]
+				author.First_Name = row[self.AuthorColumns['First_Name'].value]
+				author.Last_Name = row[self.AuthorColumns['Last_Name'].value]
+				author.Birth_Year = row[self.AuthorColumns['Birth_Year'].value]
+				author.Country = row[self.AuthorColumns['Country'].value]
+				author_list.append(author)
+			return author_list
+		except Exception as e:
+			self._logger.log_error(f'{inspect.currentframe().f_code.co_name}: {e}')
+
+	def _populate_searchbook_objects(self, results:List)->List[Book]:
+		"""Populates and returns the list of searched books."""
+		searchbook_list = []
+		try:
+			for row in results:
+				searchbook = Book()
+				searchbook.Book_ID = row[self.BookColumns['Book_ID'].value]
+				searchbook.Title = row[self.BookColumns['Title'].value]
+				searchbook.Genre = row[self.BookColumns['Genre'].value]
+				searchbook.Publication_Year = row[self.BookColumns['Publication_Year'].value]
+				searchbook.ISBN = row[self.BookColumns['ISBN'].value]
+				searchbook_list.append(searchbook)
+			return searchbook_list
+		except Exception as e:
+			self._logger.log_error(f'{inspect.currentframe().f_code.co_name}: {e}')
+
+

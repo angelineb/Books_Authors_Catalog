@@ -16,12 +16,30 @@ class AppServices(ApplicationBase):
 				   logfile_prefix_name=self.META["log_prefix"])
         self.DB = MySQLPersistenceWrapper(config)
 
-    def view_all_books_as_json(self)->str:
+    def view_all_books(self)->str:
         """Returns all books as JSON string"""
         self._logger.log_debug(f'In {inspect.currentframe().f_code.co_name}()...')
         try:
             results = self.DB.view_all_books()
-            #return results
-            return json.dumps(results)
+            return results
+            #return json.dumps(results)
         except Exception as e:
             self._logger_error(f'{inspect.currentframe().f_code.co_name}:{e}')
+
+    def view_all_authors(self)->str:
+        """Returns all authors as JSON string."""
+        self._logger.log_debug(f'In {inspect.currentframe().f_code.co_name}()...')
+        try:
+            results = self.DB.view_all_authors()
+            return results
+        except Exception as e:
+           self._logger_error(f'{inspect.currentframe().f_code.co_name}:{e}') 
+
+    def search_books_by_title(self, Title)->str:
+        """Returns the searched books by title."""
+        self._logger.log_debug(f'In {inspect.currentframe().f_code.co_name}()...')
+        try:
+            results = self.DB.search_books_by_title(Title)
+            return results
+        except Exception as e:
+           self._logger_error(f'{inspect.currentframe().f_code.co_name}:{e}')    
