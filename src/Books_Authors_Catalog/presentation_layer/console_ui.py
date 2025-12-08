@@ -27,15 +27,13 @@ class ConsoleUI(ApplicationBase):
         print(f"\t1. View all Books")
         print(f"\t2. View all Authors")
         print(f"\t3. View all Book-Author Links")
-        print(f"\t4. Search Books by Title")
-        print(f"\t5. Search Authors by Last Name")
-        print(f"\t6. Add New Book")
-        print(f"\t7. Add New Author")
-        print(f"\t8. Link Author to a Book (By Book_ID & Author_ID)")
-        print(f"\t9. Delete a Book-Author Link (By Book_ID & Author_ID)")
-        print(f"\t10. Delete a Book (By Book_ID)")
-        print(f"\t11. Delete an Author (By Author_ID)")
-        print(f"\t12. Exit")
+        print(f"\t4. Add New Book")
+        print(f"\t5. Add New Author")
+        print(f"\t6. Link Author to a Book (By Book_ID & Author_ID)")
+        print(f"\t7. Delete a Book-Author Link (By Book_ID & Author_ID)")
+        print(f"\t8. Delete a Book (By Book_ID)")
+        print(f"\t9. Delete an Author (By Author_ID)")
+        print(f"\t10. Exit")
         print()
 
     def process_menu_choice(self)->None:
@@ -46,19 +44,14 @@ class ConsoleUI(ApplicationBase):
             case '1': self.view_all_books()
             case '2': self.view_all_authors()
             case '3': self.view_all_bookauthor()
-            case '4': self.search_books_by_title()
-                #title_ask = input(f"What's the title of the book you're looking for? ")
-                #self.search_books_by_title()
-
-            case '5': self.search_authors_by_last_name()
-            case '6': self.add_new_book()
-            case '7': self.add_new_author()
-            case '8': self.link_author_to_a_book()
-            case '9': self.delete_a_bookauthor_link()
-            case '10': self.delete_a_book_by_bookID()
-            case '11': self.delete_author_by_authorID()
-            case '12': sys.exit()
-            case _: print(f"Invalid Menu Choice {menu_choice[0]}")
+            case '4': self.add_new_book()
+            case '5': self.add_new_author()
+            case '6': self.link_author_to_a_book()
+            case '7': self.delete_a_bookauthor_link()
+            case '8': self.delete_a_book_by_bookID()
+            case '9': self.delete_author_by_authorID()
+            case '10': sys.exit()
+            case _: print(f"Invalid Menu Choice {menu_choice}")
 
     def view_all_books(self)->None:
         """Display books."""
@@ -74,10 +67,6 @@ class ConsoleUI(ApplicationBase):
             #book_table.add_row([Book_ID, Title, Genre, Publication_Year, ISBN])
         print(book_table)
 
-
-    #def view_all_books(self)->None:
-        #"""Display books."""
-        #print("view_all_books() method stub called ...")
 
     def view_all_authors(self)->None:
         """Display authors."""
@@ -103,39 +92,6 @@ class ConsoleUI(ApplicationBase):
             bookauthor_table.add_row([ba.bookID, ba.authorID])
         print(bookauthor_table)
 
-    def search_books_by_title(self)->None:
-        """List searched books by title."""
-        print(f"\nSearch Book List! ")
-        title_ask = input(f"What's the title of the book you're looking for? ")
-        #print(title_ask)
-        
-       #searchbook = Book()
-        #searchbook.Title = title_ask
-
-        results = self.app_services.search_books_by_title(title_ask)
-        searchbook_table = PrettyTable()
-        searchbook_table.field_names = ['Book_ID', 'Title', 'Genre', 'Publication_Year', 'ISBN']
-        if not results:
-            print(f"\nNo books found with that title.")
-            return
-        else:
-            #searchbook_table = PrettyTable()
-            #searchbook_table.field_names = ['Book_ID', 'Title', 'Genre', 'Publication_Year', 'ISBN']
-            for books in results:
-                searchbook_table.add_row([books.Book_ID, books.Title, books.Genre, books.Publication_Year, books.ISBN])
-                print(f"\nBook(s) was found!")
-                #print(searchbook_table)
-            return results
-        #print("search_books_by_title() method stub called ...")
-        #if title_ask not in searchbook_table:
-            #print("Book was not found!")
-        #else:
-            #print("Book was found!")
-            #print(searchbook_table)
-    
-    def search_authors_by_last_name(self)->None:
-        """List searched authors by last name."""
-        print("search_authors_by_last_name() method stub called ...")
 
     def add_new_book(self)->None:
         """List new book."""
@@ -170,8 +126,12 @@ class ConsoleUI(ApplicationBase):
     def link_author_to_a_book(self):
         """List author-book link."""
         print("\n\tAdd new book-author link! ")
-        bookID = int(input("Enter Book ID: "))
-        authorID = int(input("Enter Author ID: "))
+        try:
+            bookID = int(input("Enter Book ID: "))
+            authorID = int(input("Enter Author ID: "))
+        except ValueError: 
+            #self._logger.log_error(f"Invalid input! Must be an integer.")
+            print(f"Invalid input! The Book ID and Author ID must be an integer.")
         try:
             bookauthor = BookAuthor()
             bookauthor.bookID = bookID
@@ -195,12 +155,14 @@ class ConsoleUI(ApplicationBase):
         """Delete a book-author link."""
         print(f"\n\tDelete a Book-Author Link! ")
         print(f"\n\tYou need the Book ID and Author ID for the link you would like to delete!")
-        bookID = int(input("Enter Book ID: "))
-        authorID = int(input("Enter Author ID: "))
+        try:
+            bookID = int(input("Enter Book ID: "))
+            authorID = int(input("Enter Author ID: "))
+        except ValueError: 
+            print(f"Invalid input! Must be an integer.")
         try: 
             entry_deleted = self.app_services.delete_a_bookauthor_link(bookID, authorID)
 
-        #print(f"\n [DEBUG] entry_deleted = {entry_deleted!r} (type: {type(entry_deleted)})\n")
             if entry_deleted is None:
             #print(f"\nBook-Author {bookID}, {authorID} link deleted!!!")
             #print(f"\nNo existing Book-Author Link.")
@@ -218,7 +180,10 @@ class ConsoleUI(ApplicationBase):
         """Delete book."""
         print(f"\n\tDelete a Book! ")
         print(f"\n\tYou need the Book_ID for the author you would like to delete!")
-        Book_ID = int(input("Enter Book_ID: "))
+        try:
+            Book_ID = int(input("Enter Book_ID: "))
+        except ValueError: 
+           print(f"Invalid input! Must be an integer.") 
         try:
             entry_deleted = self.app_services.delete_a_book(Book_ID)
             if entry_deleted is None:
@@ -235,7 +200,10 @@ class ConsoleUI(ApplicationBase):
         """Delete an author."""
         print(f"\n\tDelete an Author! ")
         print(f"\n\tYou need the Author_ID for the author you would like to delete!")
-        Author_ID = int(input("Enter Author_ID: "))
+        try:
+            Author_ID = int(input("Enter Author_ID: "))
+        except ValueError:
+            print(f"Invalid input! Must be an integer.")
         try:
             entry_deleted = self.app_services.delete_an_author(Author_ID)
             if entry_deleted is None:

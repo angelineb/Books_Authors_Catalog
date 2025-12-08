@@ -47,15 +47,6 @@ class AppServices(ApplicationBase):
         except Exception as e:
            self._logger_error(f'{inspect.currentframe().f_code.co_name}:{e}') 
 
-    def search_books_by_title(self, Title:str)->List[Book]:
-        """Returns the searched books by title."""
-        self._logger.log_debug(f'In {inspect.currentframe().f_code.co_name}()...')
-        try:
-            results = self.DB.search_books_by_title(Title)
-            return results
-        except Exception as e:
-           self._logger_error(f'{inspect.currentframe().f_code.co_name}:{e}')    
-
     def add_new_book(self, book:Book)-> Book:
         "Creates new book record."
         self._logger.log_debug(f'In {inspect.currentframe().f_code.co_name}()...')

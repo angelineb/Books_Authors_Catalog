@@ -64,16 +64,6 @@ class MySQLPersistenceWrapper(ApplicationBase):
 			f"FROM Books_Authors_XREF " \
 			f"ORDER BY bookID, authorID"
 		
-		self.SEARCH_BOOKS_BY_TITLE = \
-			f"SELECT Book_ID, Title, Genre, Publication_Year, ISBN " \
-			f"FROM Books_Table " \
-			f"WHERE Title LIKE %s"
-		
-		self.SEARCH_AUTHORS_BY_LASTNAME = \
-			f"SELECT Author_ID, First_Name, Last_Name, Birth_Year, Country " \
-			f"FROM Authors_Table" \
-			f"WHERE Last_Name LIKE '%s'"
-		
 		self.ADD_NEW_BOOK = \
 			f"INSERT INTO Books_Table (Book_ID, Title, Genre, Publication_Year, ISBN) " \
 			f"VALUES (%s, %s, %s, %s, %s)"
@@ -158,40 +148,6 @@ class MySQLPersistenceWrapper(ApplicationBase):
 		except Exception as e:
 			self._logger.log_error(f'{inspect.currentframe().f_code.co_name}: {e}')
 	
-
-	def search_books_by_title(self, Title: str)-> List[Book]:
-		"""Return the book search by title."""
-		cursor = None
-		results = None
-		try:
-			connection = self._connection_pool.get_connection()
-			with connection:
-				cursor = connection.cursor(dictionary=True)
-				with cursor:
-					#cursor.execute(self.SEARCH_BOOKS_BY_TITLE, ("%" + Title + "%",))
-					cursor.execute(self.SEARCH_BOOKS_BY_TITLE, (f"%{Title}%",))
-					results = cursor.fetchall()
-				searchedbook_list = self._populate_book_objects(results)
-				#return results
-				return searchedbook_list
-		except Exception as e:
-			self._logger.log_error(f'{inspect.currentframe().f_code.co_name}: {e}')
-		
-	def search_authors_by_lastname(self, Last_Name: str)-> list:
-		"""Return the author search by last name."""
-		cursor = None
-		results = None
-		try:
-			connection = self._connection_pool.get_connection()
-			with connection:
-				cursor = connection.cursor()
-				with cursor:
-					cursor.execute(self.SEARCH_AUTHORS_BY_LASTNAME, ([Last_Name]))
-					results = cursor.fetchall()
-				
-				return results
-		except Exception as e:
-			self._logger.log_error(f'{inspect.currentframe().f_code.co_name}: {e}')
 
 	def add_new_book(self, book:Book)-> Book:
 		"""Adds a new book to the list and Book_ID."""
@@ -393,23 +349,7 @@ class MySQLPersistenceWrapper(ApplicationBase):
 			return booksauthors_list
 		except Exception as e:
 			self._logger.log_error(f'{inspect.currentframe().f_code.co_name}: {e}')
-			#return []
-		#return booksauthors_list
+			
 	
-	def _populate_searchbook_objects(self, results:List)->List[Book]:
-		"""Populates and returns the list of searched books."""
-		searchbook_list = []
-		try:
-			for row in results:
-				searchbook = Book()
-				searchbook.Book_ID = row[self.BookColumns['Book_ID'].value]
-				searchbook.Title = row[self.BookColumns['Title'].value]
-				searchbook.Genre = row[self.BookColumns['Genre'].value]
-				searchbook.Publication_Year = row[self.BookColumns['Publication_Year'].value]
-				searchbook.ISBN = row[self.BookColumns['ISBN'].value]
-				searchbook_list.append(searchbook)
-			return searchbook_list
-		except Exception as e:
-			self._logger.log_error(f'{inspect.currentframe().f_code.co_name}: {e}')
 
 
