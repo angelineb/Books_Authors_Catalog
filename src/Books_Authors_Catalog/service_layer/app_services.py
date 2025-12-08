@@ -54,7 +54,7 @@ class AppServices(ApplicationBase):
             results = self.DB.add_new_book(book)
             return results
         except Exception as e:
-            self._logger.log_error(f'In {inspect.currentframe().f_code.co_name}()...')
+            self._logger_error(f'{inspect.currentframe().f_code.co_name}:{e}')
 
     def add_new_author(self, author:Author)-> Author:
         "Creates new author record."
@@ -63,7 +63,7 @@ class AppServices(ApplicationBase):
             results = self.DB.add_new_author(author)
             return results
         except Exception as e:
-            self._logger.log_error(f'In {inspect.currentframe().f_code.co_name}()...')
+            self._logger_error(f'{inspect.currentframe().f_code.co_name}:{e}')
 
     def link_book_author(self, bookauthor:BookAuthor)->BookAuthor | None:
         "Creates new book-author link."
@@ -72,7 +72,7 @@ class AppServices(ApplicationBase):
             results = self.DB.link_author_to_a_book(bookauthor)
             return results
         except Exception as e:
-            self._logger.log_error(f'In {inspect.currentframe().f_code.co_name}()...')
+            self._logger.log_error(f'{inspect.currentframe().f_code.co_name}:{e}')
             return None
 
     def delete_a_bookauthor_link(self, bookID: int, authorID:int)->int | None:
