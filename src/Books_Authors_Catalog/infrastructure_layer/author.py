@@ -18,10 +18,10 @@ class Author():
         return self.to_json()
     
     def to_json(self)->str:
-        book_dict = {}
-        book_dict['Author_ID'] = self.Author_ID
-        book_dict['First_Name'] = self.First_Name
-        book_dict['Last_Name'] = self.Last_Name
-        book_dict['Birth_Year'] = self.Birth_Year
-        book_dict['Country'] = self.Country
+        author_dict = {}
+        author_dict['Author_ID'] = self.Author_ID
+        author_dict['First_Name'] = self.First_Name
+        author_dict['Last_Name'] = self.Last_Name
+        author_dict['Birth_Year'] = self.Birth_Year
+        author_dict['Country'] = self.Country
         

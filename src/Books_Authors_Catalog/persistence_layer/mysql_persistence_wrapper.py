@@ -8,6 +8,7 @@ import json
 from typing import List
 from Books_Authors_Catalog.infrastructure_layer.book import Book
 from Books_Authors_Catalog.infrastructure_layer.author import Author
+from Books_Authors_Catalog.infrastructure_layer.bookauthor import BookAuthor
 from enum import Enum
 
 class MySQLPersistenceWrapper(ApplicationBase):
@@ -44,6 +45,9 @@ class MySQLPersistenceWrapper(ApplicationBase):
 		self.AuthorColumns = \
 			Enum('AuthorColumns', [('Author_ID', 0), ('First_Name', 1),
 				('Last_Name', 2), ('Birth_Year', 3), ('Country', 4) ])
+		#BookAuthor Columns ENUMS
+		self.BookAuthorColumns = \
+			Enum('BookAuthorColumns', [('bookID, 0'), ('authorID, 1')])
 
 		# SQL String Constants
 
@@ -55,10 +59,15 @@ class MySQLPersistenceWrapper(ApplicationBase):
 			f"SELECT Author_ID, First_Name, Last_Name, Birth_Year, Country " \
 			f"FROM Authors_Table"
 		
+		self.VIEW_ALL_BOOKAUTHOR = \
+			f"SELECT bookID, authorID  " \
+			f"FROM Books_Authors_XREF " \
+			f"ORDER BY bookID, authorID"
+		
 		self.SEARCH_BOOKS_BY_TITLE = \
 			f"SELECT Book_ID, Title, Genre, Publication_Year, ISBN " \
-			f"FROM Books_Table" \
-			f"WHERE Title LIKE '%s'"
+			f"FROM Books_Table " \
+			f"WHERE Title LIKE %s"
 		
 		self.SEARCH_AUTHORS_BY_LASTNAME = \
 			f"SELECT Author_ID, First_Name, Last_Name, Birth_Year, Country " \
@@ -74,16 +83,20 @@ class MySQLPersistenceWrapper(ApplicationBase):
 			f"VALUES (%s, %s, %s, %s, %s)"
 		
 		self.LINK_AUTHOR_TO_A_BOOK = \
-		f"INSERT INTO Books_Authors_XREF (bookID, authorID) " \
-		f"VALUES (%s, %s)"
+			f"INSERT INTO Books_Authors_XREF (bookID, authorID) " \
+			f"VALUES (%s, %s)"
 
+		self.DELETE_A_BOOKAUTHOR_LINK = \
+			f"DELETE FROM Books_Authors_XREF " \
+			f"WHERE bookID = %s AND authorID = %s"
+		
 		self.DELETE_A_BOOK = \
-		f"DELETE FROM Books_Table " \
-		f"WHERE ISBN LIKE '%s'"
+			f"DELETE FROM Books_Table " \
+			f"WHERE Book_ID LIKE %s"
 
 		self.DELETE_AN_AUTHOR = \
-		f"DELETE FROM Authors_Table " \
-		f"WHERE Author_ID LIKE '%s'"
+			f"DELETE FROM Authors_Table " \
+			f"WHERE Author_ID = %s"
 	
 
 
@@ -128,18 +141,37 @@ class MySQLPersistenceWrapper(ApplicationBase):
 		except Exception as e:
 			self._logger.log_error(f'{inspect.currentframe().f_code.co_name}: {e}')
 
-	def search_books_by_title(self, Title: str)-> list:
+	def view_all_bookauthor(self)-> list:
+		"Returns a list of all books-authors links."
+		cursor = None
+		results = None
+		try:
+			connection = self._connection_pool.get_connection()
+			with connection:
+				cursor = connection.cursor(dictionary=True)
+				with cursor:
+					cursor.execute(self.VIEW_ALL_BOOKAUTHOR)
+					results = cursor.fetchall()
+					booksauthors_list = self._populate_booksauthors_objects(results)
+				
+				return booksauthors_list
+		except Exception as e:
+			self._logger.log_error(f'{inspect.currentframe().f_code.co_name}: {e}')
+	
+
+	def search_books_by_title(self, Title: str)-> List[Book]:
 		"""Return the book search by title."""
 		cursor = None
 		results = None
 		try:
 			connection = self._connection_pool.get_connection()
 			with connection:
-				cursor = connection.cursor()
+				cursor = connection.cursor(dictionary=True)
 				with cursor:
-					cursor.execute(self.SEARCH_BOOKS_BY_TITLE, (['Title']))
+					#cursor.execute(self.SEARCH_BOOKS_BY_TITLE, ("%" + Title + "%",))
+					cursor.execute(self.SEARCH_BOOKS_BY_TITLE, (f"%{Title}%",))
 					results = cursor.fetchall()
-				searchedbook_list = self._populate_searchbook_objects(results)
+				searchedbook_list = self._populate_book_objects(results)
 				#return results
 				return searchedbook_list
 		except Exception as e:
@@ -161,7 +193,7 @@ class MySQLPersistenceWrapper(ApplicationBase):
 		except Exception as e:
 			self._logger.log_error(f'{inspect.currentframe().f_code.co_name}: {e}')
 
-	def add_new_book(self)-> list:
+	def add_new_book(self, book:Book)-> Book:
 		"""Adds a new book to the list and Book_ID."""
 		cursor = None
 		results = None
@@ -170,14 +202,19 @@ class MySQLPersistenceWrapper(ApplicationBase):
 			with connection:
 				cursor = connection.cursor()
 				with cursor:
-					cursor.execute(self.ADD_NEW_BOOK)
-					results = cursor.fetchall()
+					cursor.execute(self.ADD_NEW_BOOK, 
+						([book.Book_ID, book.Title, book.Genre, book.Publication_Year, book.ISBN]))
+					connection.commit()
+					self._logger.log_debug(f"Updated {cursor.rowcount} row.")
+					self._logger.log_debug(f"Last Row Book_ID: {cursor.lastrowid}.")
+					book.Book_ID = cursor.lastrowid
+					#results = cursor.fetchall()
 				
-				return results
+				return book
 		except Exception as e:
 			self._logger.log_error(f'{inspect.currentframe().f_code.co_name}: {e}')
 
-	def add_new_authors(self)-> list:
+	def add_new_author(self, author:Author)-> Author:
 		"""Adds a new author to the list and Author_ID."""
 		cursor = None
 		results = None
@@ -186,14 +223,19 @@ class MySQLPersistenceWrapper(ApplicationBase):
 			with connection:
 				cursor = connection.cursor()
 				with cursor:
-					cursor.execute(self.ADD_NEW_AUTHOR)
-					results = cursor.fetchall()
+					cursor.execute(self.ADD_NEW_AUTHOR,
+						([author.Author_ID, author.First_Name, author.Last_Name, author.Birth_Year, author.Country]))
+					connection.commit()
+					self._logger.log_debug(f"Updated {cursor.rowcount} row.")
+					self._logger.log_debug(f"Last Row Book_ID: {cursor.lastrowid}.")
+					author.Author_ID = cursor.lastrowid
+					#results = cursor.fetchall()
 				
-				return results
+				return author
 		except Exception as e:
 			self._logger.log_error(f'{inspect.currentframe().f_code.co_name}: {e}')
 
-	def link_author_to_a_book(self, bookID, authorID)-> list:
+	def link_author_to_a_book(self, bookauthor:BookAuthor)-> BookAuthor | None:
 		"""Returns a list that contains the new author-book link."""
 		cursor = None
 		results = None
@@ -202,15 +244,22 @@ class MySQLPersistenceWrapper(ApplicationBase):
 			with connection:
 				cursor = connection.cursor()
 				with cursor:
-					cursor.execute(self.LINK_AUTHOR_TO_A_BOOK, (bookID, authorID))
-					results = cursor.fetchall()
+					cursor.execute(self.LINK_AUTHOR_TO_A_BOOK, 
+						([bookauthor.bookID, bookauthor.authorID]))
+					connection.commit()
+					self._logger.log_debug(f"Updated {cursor.rowcount} row.")
+					#self._logger.log_debug(f"Last Row Book ID: {cursor.lastrowid}.")
+					#self._logger.log_debug(f"Last Row Author ID: {cursor.lastrowid}.")
+					#bookauthor.bookID = cursor.lastrowid
+					#bookauthor.authorID = cursor.lastrowid
+					#results = cursor.fetchall()
 				
-				return results
+				return bookauthor
 		except Exception as e:
 			self._logger.log_error(f'{inspect.currentframe().f_code.co_name}: {e}')
 	
-	def delete_a_book(self, ISBN)-> list:
-		"""Deletes a book by its ISBN."""
+	def delete_a_bookauthor_link(self, bookID: int, authorID: int)-> int:
+		"""Deletes book-author link."""
 		cursor = None
 		results = None
 		try:
@@ -218,14 +267,43 @@ class MySQLPersistenceWrapper(ApplicationBase):
 			with connection:
 				cursor = connection.cursor()
 				with cursor:
-					cursor.execute(self.DELETE_A_BOOK)
-					results = cursor.fetchall()
+					cursor.execute(self.DELETE_A_BOOKAUTHOR_LINK, (bookID, authorID))
+					connection.commit()
 				
-				return results
+					#results = cursor.fetchall()
+				
+					#return results
+					rows_deleted = cursor.rowcount
+					return rows_deleted
+		except Exception as e:
+			self._logger.log_error(f'{inspect.currentframe().f_code.co_name}: {e}')
+	
+	def delete_a_book(self, Book_ID: int)-> int:
+		"""Deletes a book by its Book_ID."""
+		cursor = None
+		results = None
+		try:
+			connection = self._connection_pool.get_connection()
+			with connection:
+				cursor = connection.cursor()
+				with cursor:
+					#Deletes the corresponding bookid from xref before book table.
+					xref_code = "DELETE FROM Books_Authors_XREF WHERE bookID = %s"
+					cursor.execute(xref_code, (Book_ID,))
+					cursor.execute(self.DELETE_A_BOOK, (Book_ID,))
+					connection.commit()
+					
+					rows_deleted = cursor.rowcount
+					connection.commit()
+					return rows_deleted
+				
+					#results = cursor.fetchall()
+				
+				#return results
 		except Exception as e:
 			self._logger.log_error(f'{inspect.currentframe().f_code.co_name}: {e}')
 
-	def delete_an_author(self, Author_ID)-> list:
+	def delete_an_author(self, Author_ID: int)-> int:
 		"""Deletes an author by its Author_ID."""
 		cursor = None
 		results = None
@@ -234,10 +312,17 @@ class MySQLPersistenceWrapper(ApplicationBase):
 			with connection:
 				cursor = connection.cursor()
 				with cursor:
-					cursor.execute(self.DELETE_AN_AUTHOR)
-					results = cursor.fetchall()
+					#Deletes the corresponding authorid from xref before author table.
+					xref_code = "DELETE FROM Books_Authors_XREF WHERE authorID = %s"
+					cursor.execute(xref_code, (Author_ID,))
+					cursor.execute(self.DELETE_AN_AUTHOR, (Author_ID,))
+					connection.commit()
+					#results = cursor.fetchall()
 				
-				return results
+				#return results
+					rows_deleted = cursor.rowcount
+					connection.commit()
+					return rows_deleted
 		except Exception as e:
 			self._logger.log_error(f'{inspect.currentframe().f_code.co_name}: {e}')
 
@@ -294,6 +379,23 @@ class MySQLPersistenceWrapper(ApplicationBase):
 		except Exception as e:
 			self._logger.log_error(f'{inspect.currentframe().f_code.co_name}: {e}')
 
+	def _populate_booksauthors_objects(self, results:List)->List[BookAuthor]:
+		"""Populates and returns a list of BooksAuthors objects"""
+		booksauthors_list = []
+		try:
+			for row in results:
+				booksauthors = BookAuthor()
+				booksauthors.bookID = row["bookID"]
+				booksauthors.authorID = row["authorID"]
+				#booksauthors.bookID = row[self.BookAuthorColumns['bookID'].value]
+				#booksauthors.authorID = row[self.BookAuthorColumns['authorID'].value]
+				booksauthors_list.append(booksauthors)
+			return booksauthors_list
+		except Exception as e:
+			self._logger.log_error(f'{inspect.currentframe().f_code.co_name}: {e}')
+			#return []
+		#return booksauthors_list
+	
 	def _populate_searchbook_objects(self, results:List)->List[Book]:
 		"""Populates and returns the list of searched books."""
 		searchbook_list = []
